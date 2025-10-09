@@ -17,7 +17,7 @@ pipeline {
             steps {
                 dir('landing-page') {
                     echo 'Running tests...'
-                    sh 'npm test -- --watchAll=false'
+                    sh 'npx vitest run'
                 }
             }
         }
