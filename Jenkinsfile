@@ -1,40 +1,41 @@
-pipeline {
-    agent any
-    tools { nodejs 'Node' }
+node {
+    stage('Checkout') {
+        echo 'Cloning repository...'
+        checkout scm
+    }
 
-    stages {
-        stage('Build') {
-            steps {
-                dir('landing-page') {       
-                    echo 'Installing dependencies and building React app...'
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            }
-        }
+    stage('Set up NodeJS') {
+        echo 'Setting up NodeJS environment...'
+        def nodeHome = tool name: 'Node', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+        env.PATH = "${nodeHome}/bin:${env.PATH}"
+    }
 
-        stage('Test') {
-            steps {
-                dir('landing-page') {
-                    echo 'Running tests...'
-                    sh 'npx vitest run'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                dir('landing-page') {
-                    echo 'Deploying React app...'
-                   
-                }
-            }
+    stage('Build') {
+        dir('landing-page') {
+            echo 'Installing dependencies and building React app...'
+            sh 'npm install'
+            sh 'npm run build'
         }
     }
 
-    post {
-        always { echo 'Cleaning up...' }
-        success { echo 'Pipeline succeeded!' }
-        failure { echo 'Pipeline failed!' }
+    stage('Test') {
+        dir('landing-page') {
+            echo 'Running Vitest tests...'
+            // If you want to allow pipeline success even with no tests, add "|| true" at the end
+            sh 'npx vitest run'
+        }
     }
+
+    stage('Deploy') {
+        echo 'Deploying application... (placeholder)'
+        // Example future step:
+        // sh 'npm run deploy'
+    }
+
+    stage('Cleanup') {
+        echo 'Cleaning up...'
+    }
+
+    echo '✅ Pipeline completed successfully!'
 }
+
